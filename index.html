@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Térence Volcan — Final Form</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cinzel:wght@400;700;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #050403;
+    --deep: #0d0806;
+    --lava: #ff3a00;
+    --lava2: #ff6a00;
+    --gold: #ffb347;
+    --ember: #ff8c00;
+    --ash: #c8bfb8;
+    --smoke: #4a4540;
+    --text: #f5ede8;
+    --muted: #8a7d75;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* CUSTOM CURSOR */
+  .cursor {
+    width: 8px;
+    height: 8px;
+    background: var(--lava);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    transition: transform 0.1s;
+    box-shadow: 0 0 12px var(--lava), 0 0 24px var(--lava2);
+  }
+  .cursor-ring {
+    width: 32px;
+    height: 32px;
+    border: 1px solid rgba(255,58,0,0.4);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9998;
+    transition: all 0.15s ease;
+  }
+
+  /* CANVAS BACKGROUND */
+  #volcanoCanvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+    opacity: 0.6;
+  }
+
+  /* GRAIN OVERLAY */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.4;
+  }
+
+  /* ALL SECTIONS ABOVE CANVAS */
+  nav, section, footer { position: relative; z-index: 2; }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    padding: 20px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 100;
+    mix-blend-mode: normal;
+  }
+  nav::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(5,4,3,0.9) 0%, transparent 100%);
+    pointer-events: none;
+  }
+  .nav-logo {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--gold);
+    text-shadow: 0 0 20px rgba(255,179,71,0.5);
+  }
+  .nav-links {
+    display: flex;
+    gap: 32px;
+    list-style: none;
+  }
+  .nav-links a {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+  .nav-links a:hover { color: var(--lava2); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 120px 24px 80px;
+    position: relative;
+  }
+
+  .hero-eyebrow {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    color: var(--lava);
+    margin-bottom: 24px;
+    opacity: 0;
+    animation: fadeUp 1s 0.3s forwards;
+  }
+
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(80px, 20vw, 200px);
+    line-height: 0.85;
+    letter-spacing: -2px;
+    margin-bottom: 8px;
+    opacity: 0;
+    animation: fadeUp 1s 0.5s forwards;
+    position: relative;
+  }
+  .hero-title .line1 {
+    display: block;
+    color: var(--text);
+    text-shadow: 0 0 80px rgba(255,58,0,0.3);
+  }
+  .hero-title .line2 {
+    display: block;
+    background: linear-gradient(135deg, var(--lava) 0%, var(--gold) 50%, var(--lava2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 30px rgba(255,58,0,0.6));
+  }
+
+  .hero-sub {
+    font-size: 13px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 32px;
+    margin-bottom: 48px;
+    opacity: 0;
+    animation: fadeUp 1s 0.7s forwards;
+  }
+  .hero-sub span {
+    color: var(--ash);
+  }
+
+  .hero-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: linear-gradient(135deg, var(--lava), var(--ember));
+    color: #fff;
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 16px 40px;
+    text-decoration: none;
+    border-radius: 2px;
+    opacity: 0;
+    animation: fadeUp 1s 0.9s forwards;
+    box-shadow: 0 0 40px rgba(255,58,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+    transition: all 0.3s;
+    cursor: none;
+  }
+  .hero-cta:hover {
+    box-shadow: 0 0 60px rgba(255,58,0,0.7), inset 0 1px 0 rgba(255,255,255,0.15);
+    transform: translateY(-2px);
+  }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    opacity: 0;
+    animation: fadeUp 1s 1.4s forwards;
+  }
+  .scroll-hint span {
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--smoke);
+  }
+  .scroll-line {
+    width: 1px;
+    height: 48px;
+    background: linear-gradient(to bottom, var(--lava), transparent);
+    animation: scrollPulse 2s infinite;
+  }
+
+  /* MANIFESTE */
+  .manifeste {
+    padding: 120px 24px;
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  .section-tag {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: var(--lava);
+    margin-bottom: 24px;
+    display: block;
+  }
+  .manifeste-text {
+    font-size: clamp(22px, 4vw, 38px);
+    font-weight: 300;
+    line-height: 1.5;
+    color: var(--ash);
+    font-style: italic;
+  }
+  .manifeste-text strong {
+    font-style: normal;
+    font-weight: 500;
+    color: var(--text);
+  }
+  .manifeste-text .fire {
+    color: var(--lava2);
+    font-style: normal;
+  }
+
+  .divider {
+    width: 60px;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--lava), transparent);
+    margin: 60px auto;
+  }
+
+  /* STATS BAND */
+  .stats-band {
+    border-top: 1px solid rgba(255,58,0,0.15);
+    border-bottom: 1px solid rgba(255,58,0,0.15);
+    padding: 48px 24px;
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    flex-wrap: wrap;
+    background: rgba(255,58,0,0.03);
+  }
+  .stat-item {
+    text-align: center;
+    padding: 16px 40px;
+    border-right: 1px solid rgba(255,58,0,0.1);
+    flex: 1;
+    min-width: 120px;
+  }
+  .stat-item:last-child { border-right: none; }
+  .stat-big {
+    font-family: 'Bebas Neue';
+    font-size: 56px;
+    line-height: 1;
+    background: linear-gradient(135deg, var(--lava2), var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .stat-small {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* PHASES */
+  .phases {
+    padding: 120px 24px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .phases-title {
+    font-family: 'Bebas Neue';
+    font-size: clamp(48px, 10vw, 80px);
+    text-align: center;
+    margin-bottom: 8px;
+    color: var(--text);
+    letter-spacing: 2px;
+  }
+  .phases-sub {
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 64px;
+  }
+
+  .phase-grid {
+    display: grid;
+    gap: 16px;
+  }
+  .phase-card {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 24px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,58,0,0.1);
+    border-radius: 4px;
+    padding: 28px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s;
+  }
+  .phase-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: linear-gradient(to bottom, var(--lava), var(--ember));
+    opacity: 0.5;
+    transition: opacity 0.3s;
+  }
+  .phase-card:hover {
+    border-color: rgba(255,58,0,0.3);
+    background: rgba(255,58,0,0.04);
+  }
+  .phase-card:hover::before { opacity: 1; }
+
+  .phase-num {
+    font-family: 'Bebas Neue';
+    font-size: 64px;
+    line-height: 1;
+    color: rgba(255,58,0,0.15);
+    text-align: center;
+  }
+  .phase-content {}
+  .phase-weeks {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--lava);
+    margin-bottom: 8px;
+  }
+  .phase-name {
+    font-family: 'Bebas Neue';
+    font-size: 28px;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+  .phase-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* PROGRAMME LINK */
+  .programme-section {
+    padding: 80px 24px 120px;
+    text-align: center;
+  }
+  .prog-card {
+    max-width: 600px;
+    margin: 0 auto;
+    background: rgba(255,58,0,0.04);
+    border: 1px solid rgba(255,58,0,0.2);
+    border-radius: 4px;
+    padding: 48px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  .prog-card::before {
+    content: '🌋';
+    position: absolute;
+    right: -20px;
+    bottom: -20px;
+    font-size: 120px;
+    opacity: 0.05;
+    pointer-events: none;
+  }
+  .prog-card-tag {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--lava);
+    margin-bottom: 16px;
+  }
+  .prog-card-title {
+    font-family: 'Bebas Neue';
+    font-size: 42px;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+    color: var(--text);
+  }
+  .prog-card-desc {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: 32px;
+  }
+  .prog-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid rgba(255,58,0,0.4);
+    color: var(--lava2);
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 14px 36px;
+    text-decoration: none;
+    border-radius: 2px;
+    transition: all 0.3s;
+    cursor: none;
+    background: transparent;
+  }
+  .prog-btn:hover {
+    background: var(--lava);
+    border-color: var(--lava);
+    color: #fff;
+    box-shadow: 0 0 40px rgba(255,58,0,0.4);
+  }
+
+  /* QUOTE */
+  .quote-section {
+    padding: 80px 24px;
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+  .quote-mark {
+    font-family: 'Cinzel', serif;
+    font-size: 80px;
+    color: rgba(255,58,0,0.2);
+    line-height: 0.5;
+    margin-bottom: 24px;
+  }
+  .quote-text {
+    font-size: clamp(18px, 3vw, 26px);
+    font-weight: 300;
+    font-style: italic;
+    color: var(--ash);
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+  .quote-author {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--lava);
+  }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid rgba(255,58,0,0.1);
+    padding: 40px 24px;
+    text-align: center;
+  }
+  .footer-logo {
+    font-family: 'Cinzel', serif;
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, var(--lava), var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 12px;
+  }
+  .footer-sub {
+    font-size: 11px;
+    color: var(--smoke);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes scrollPulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+  }
+  @keyframes flicker {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.85; }
+  }
+
+  /* REVEAL ON SCROLL */
+  .reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* MOBILE */
+  @media (max-width: 600px) {
+    nav { padding: 16px 20px; }
+    .nav-links { display: none; }
+    .stats-band { gap: 0; }
+    .stat-item { min-width: 100px; padding: 12px 16px; }
+    .phase-card { grid-template-columns: 1fr; gap: 8px; }
+    .phase-num { font-size: 40px; text-align: left; }
+    body { cursor: auto; }
+    .cursor, .cursor-ring { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<canvas id="volcanoCanvas"></canvas>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">Térence Volcan</div>
+  <ul class="nav-links">
+    <li><a href="#manifeste">Manifeste</a></li>
+    <li><a href="#phases">Phases</a></li>
+    <li><a href="#programme">Programme</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <p class="hero-eyebrow">Martinique · Final Form</p>
+  <h1 class="hero-title">
+    <span class="line1">TÉRENCE</span>
+    <span class="line2">VOLCAN</span>
+  </h1>
+  <p class="hero-sub"><span>78 kg</span> → <span>72 kg</span> · L'éruption a commencé</p>
+  <a href="#programme" class="hero-cta">Voir le programme ↓</a>
+
+  <div class="scroll-hint">
+    <div class="scroll-line"></div>
+    <span>Descendre</span>
+  </div>
+</section>
+
+<!-- MANIFESTE -->
+<section class="manifeste" id="manifeste">
+  <span class="section-tag reveal">Manifeste</span>
+  <p class="manifeste-text reveal">
+    Un volcan ne s'excuse pas de <strong>dormir longtemps.</strong><br>
+    Il accumule. Il presse. Il monte.<br>
+    Et quand il <span class="fire">explose</span> — tout le monde le voit.
+  </p>
+  <div class="divider reveal"></div>
+  <p class="manifeste-text reveal" style="font-size:clamp(16px,2.5vw,22px); color: var(--muted);">
+    Ce n'est pas un régime. Ce n'est pas une résolution.<br>
+    C'est une <strong>transformation définitive.</strong><br>
+    Forgé dans la discipline, ancré dans les racines.
+  </p>
+</section>
+
+<!-- STATS -->
+<div class="stats-band reveal">
+  <div class="stat-item">
+    <div class="stat-big">24</div>
+    <div class="stat-small">Semaines</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-big">4</div>
+    <div class="stat-small">Séances / semaine</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-big">-6kg</div>
+    <div class="stat-small">Objectif graisse</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-big">∞</div>
+    <div class="stat-small">Version finale</div>
+  </div>
+</div>
+
+<!-- PHASES -->
+<section class="phases" id="phases">
+  <div class="reveal">
+    <span class="section-tag">Progression</span>
+    <h2 class="phases-title">LES 3 ÉRUPTIONS</h2>
+    <p class="phases-sub">Chaque bloc forge une version plus proche de la forme finale</p>
+  </div>
+
+  <div class="phase-grid">
+    <div class="phase-card reveal">
+      <div class="phase-num">I</div>
+      <div class="phase-content">
+        <div class="phase-weeks">Semaines 1 — 8</div>
+        <div class="phase-name">LA CHAMBRE MAGMATIQUE</div>
+        <div class="phase-desc">La lave s'accumule en profondeur. Apprentissage des mouvements, maîtrise technique, premières sensations musculaires. Le feu est là — il se prépare.</div>
+      </div>
+    </div>
+    <div class="phase-card reveal">
+      <div class="phase-num">II</div>
+      <div class="phase-content">
+        <div class="phase-weeks">Semaines 10 — 16</div>
+        <div class="phase-name">LA MONTÉE EN PRESSION</div>
+        <div class="phase-desc">Les charges augmentent, le corps change. La silhouette commence à apparaître. Les épaules s'élargissent, le ventre recule. La pression est insoutenable.</div>
+      </div>
+    </div>
+    <div class="phase-card reveal">
+      <div class="phase-num">III</div>
+      <div class="phase-content">
+        <div class="phase-weeks">Semaines 18 — 24</div>
+        <div class="phase-name">L'ÉRUPTION</div>
+        <div class="phase-desc">La transformation est visible. Térence Volcan est là. Corps recomposé, posture transformée, épaules larges, ventre plat. La forme finale est atteinte.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- QUOTE -->
+<section class="quote-section reveal">
+  <div class="quote-mark">"</div>
+  <p class="quote-text">Je ne perds pas de poids.<br>Je me forge.</p>
+  <p class="quote-author">Térence Volcan · 2025</p>
+</section>
+
+<!-- PROGRAMME -->
+<section class="programme-section" id="programme">
+  <div class="prog-card reveal">
+    <p class="prog-card-tag">Programme complet</p>
+    <h3 class="prog-card-title">FINAL FORM PROTOCOL</h3>
+    <p class="prog-card-desc">
+      4 jours de salle · Push / Pull / Legs / Upper<br>
+      Nutrition · Progression 24 semaines · Programme maison<br>
+      Conçu sur mesure pour atteindre Térence Volcan.
+    </p>
+    <a href="programme.html" class="prog-btn">Accéder au programme →</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo reveal">Térence Volcan</div>
+  <p class="footer-sub reveal">Martinique · Final Form · 2025-2026</p>
+</footer>
+
+<script>
+  // CURSOR
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursor.style.left = mx - 4 + 'px';
+    cursor.style.top = my - 4 + 'px';
+  });
+
+  function animateRing() {
+    rx += (mx - rx - 16) * 0.12;
+    ry += (my - ry - 16) * 0.12;
+    ring.style.left = rx + 'px';
+    ring.style.top = ry + 'px';
+    requestAnimationFrame(animateRing);
+  }
+  animateRing();
+
+  // VOLCANO CANVAS
+  const canvas = document.getElementById('volcanoCanvas');
+  const ctx = canvas.getContext('2d');
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  // Particles
+  const particles = [];
+  class Particle {
+    constructor() { this.reset(); }
+    reset() {
+      this.x = canvas.width * 0.5 + (Math.random() - 0.5) * canvas.width * 0.3;
+      this.y = canvas.height + 20;
+      this.vx = (Math.random() - 0.5) * 1.5;
+      this.vy = -(Math.random() * 2 + 1);
+      this.life = 1;
+      this.decay = Math.random() * 0.006 + 0.002;
+      this.size = Math.random() * 3 + 1;
+      this.hue = Math.random() * 40; // 0-40 = red to orange
+    }
+    update() {
+      this.x += this.vx;
+      this.y += this.vy;
+      this.vy -= 0.005;
+      this.vx *= 0.999;
+      this.life -= this.decay;
+      if (this.life <= 0) this.reset();
+    }
+    draw() {
+      ctx.save();
+      ctx.globalAlpha = this.life * 0.6;
+      const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 3);
+      gradient.addColorStop(0, `hsl(${this.hue}, 100%, 70%)`);
+      gradient.addColorStop(1, 'transparent');
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size * 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  for (let i = 0; i < 120; i++) {
+    const p = new Particle();
+    p.y = Math.random() * canvas.height; // spread initial
+    particles.push(p);
+  }
+
+  // Lava glow at bottom
+  function drawLavaGlow() {
+    const grad = ctx.createRadialGradient(
+      canvas.width / 2, canvas.height,
+      0,
+      canvas.width / 2, canvas.height,
+      canvas.width * 0.8
+    );
+    grad.addColorStop(0, 'rgba(255,58,0,0.15)');
+    grad.addColorStop(0.3, 'rgba(255,100,0,0.06)');
+    grad.addColorStop(1, 'transparent');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawLavaGlow();
+    particles.forEach(p => { p.update(); p.draw(); });
+    requestAnimationFrame(animate);
+  }
+  animate();
+
+  // SCROLL REVEAL
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        // stagger children if multiple
+      }
+    });
+  }, { threshold: 0.15 });
+
+  reveals.forEach(r => observer.observe(r));
+</script>
+</body>
+</html>

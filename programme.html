@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Programme Térence — Recompo Corporelle</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111111;
+    --surface2: #1a1a1a;
+    --border: #222222;
+    --accent: #e8ff00;
+    --accent2: #ff6b35;
+    --text: #f0f0f0;
+    --muted: #666;
+    --success: #4ade80;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* HERO */
+  .hero {
+    background: linear-gradient(135deg, #0a0a0a 0%, #111 50%, #0d1a00 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 48px 24px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: 'T';
+    position: absolute;
+    right: -20px;
+    top: -40px;
+    font-family: 'Bebas Neue';
+    font-size: 280px;
+    color: rgba(232,255,0,0.04);
+    pointer-events: none;
+  }
+  .hero-tag {
+    display: inline-block;
+    background: var(--accent);
+    color: #000;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 2px;
+    margin-bottom: 16px;
+  }
+  .hero h1 {
+    font-family: 'Bebas Neue';
+    font-size: clamp(42px, 10vw, 72px);
+    line-height: 1;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+  }
+  .hero h1 span { color: var(--accent); }
+  .hero-sub {
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 300;
+    letter-spacing: 0.5px;
+  }
+  .hero-stats {
+    display: flex;
+    gap: 24px;
+    margin-top: 32px;
+    flex-wrap: wrap;
+  }
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .stat-val {
+    font-family: 'Bebas Neue';
+    font-size: 28px;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    overflow-x: auto;
+    scrollbar-width: none;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    padding: 16px 20px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: all 0.2s;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  /* CONTENT */
+  .content {
+    padding: 24px 16px;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* WEEK GRID */
+  .week-grid {
+    display: grid;
+    gap: 10px;
+    margin-bottom: 32px;
+  }
+  .day-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .day-card:hover { border-color: #333; }
+  .day-card.rest {
+    opacity: 0.5;
+  }
+  .day-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .day-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .day-num {
+    font-family: 'Bebas Neue';
+    font-size: 32px;
+    color: var(--accent);
+    line-height: 1;
+    min-width: 32px;
+  }
+  .day-info {}
+  .day-name {
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+  }
+  .day-focus {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .day-badge {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 3px;
+    background: rgba(232,255,0,0.1);
+    color: var(--accent);
+    border: 1px solid rgba(232,255,0,0.2);
+  }
+  .day-badge.rest-badge {
+    background: rgba(255,255,255,0.05);
+    color: var(--muted);
+    border-color: var(--border);
+  }
+  .day-badge.home-badge {
+    background: rgba(255,107,53,0.1);
+    color: var(--accent2);
+    border-color: rgba(255,107,53,0.2);
+  }
+  .chevron {
+    color: var(--muted);
+    font-size: 16px;
+    transition: transform 0.3s;
+  }
+  .day-card.open .chevron { transform: rotate(180deg); }
+
+  .day-body {
+    display: none;
+    padding: 0 16px 16px;
+    border-top: 1px solid var(--border);
+  }
+  .day-card.open .day-body { display: block; }
+
+  /* EXERCISE TABLE */
+  .ex-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+    font-size: 13px;
+  }
+  .ex-table th {
+    text-align: left;
+    padding: 8px 8px;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+  .ex-table td {
+    padding: 10px 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    vertical-align: top;
+  }
+  .ex-table tr:last-child td { border-bottom: none; }
+  .ex-name { font-weight: 500; }
+  .ex-sets {
+    font-family: 'Bebas Neue';
+    font-size: 16px;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+  .ex-note {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+    font-style: italic;
+  }
+  .ex-focus {
+    font-size: 11px;
+    color: #888;
+    max-width: 160px;
+  }
+
+  .section-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent2);
+    font-weight: 600;
+    margin: 20px 0 8px;
+  }
+
+  /* NUTRITION */
+  .macro-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .macro-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+  }
+  .macro-val {
+    font-family: 'Bebas Neue';
+    font-size: 36px;
+    line-height: 1;
+    color: var(--accent);
+  }
+  .macro-unit {
+    font-family: 'Bebas Neue';
+    font-size: 16px;
+    color: var(--muted);
+  }
+  .macro-label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 4px;
+  }
+
+  .meal-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 10px;
+  }
+  .meal-time {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent2);
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .meal-name {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 4px;
+  }
+  .meal-detail {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* PROGRESSION */
+  .prog-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 10px;
+    position: relative;
+    overflow: hidden;
+  }
+  .prog-block::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--accent);
+  }
+  .prog-block.b2::before { background: var(--accent2); }
+  .prog-block.b3::before { background: var(--success); }
+  .prog-block.deload::before { background: var(--muted); }
+  .prog-weeks {
+    font-family: 'Bebas Neue';
+    font-size: 13px;
+    letter-spacing: 2px;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .prog-block.b2 .prog-weeks { color: var(--accent2); }
+  .prog-block.b3 .prog-weeks { color: var(--success); }
+  .prog-block.deload .prog-weeks { color: var(--muted); }
+  .prog-title {
+    font-weight: 600;
+    font-size: 15px;
+    margin-bottom: 8px;
+  }
+  .prog-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* INFO BOXES */
+  .info-box {
+    background: rgba(232,255,0,0.04);
+    border: 1px solid rgba(232,255,0,0.15);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    line-height: 1.7;
+    color: #ccc;
+  }
+  .info-box strong { color: var(--accent); }
+  .info-box.orange {
+    background: rgba(255,107,53,0.04);
+    border-color: rgba(255,107,53,0.15);
+  }
+  .info-box.orange strong { color: var(--accent2); }
+
+  /* PAGE TITLES */
+  .page-title {
+    font-family: 'Bebas Neue';
+    font-size: 36px;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+  .page-sub {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 24px;
+  }
+
+  /* SUPPLEMENTS */
+  .supps {
+    display: grid;
+    gap: 10px;
+    margin-top: 16px;
+  }
+  .supp {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+  .supp-icon {
+    font-size: 22px;
+    width: 36px;
+    text-align: center;
+  }
+  .supp-name {
+    font-weight: 600;
+    font-size: 13px;
+  }
+  .supp-dose {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  /* HOME PROGRAM */
+  .circuit-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .circuit-header {
+    background: rgba(255,107,53,0.08);
+    border-bottom: 1px solid rgba(255,107,53,0.2);
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .circuit-title {
+    font-family: 'Bebas Neue';
+    font-size: 20px;
+    color: var(--accent2);
+    letter-spacing: 1px;
+  }
+  .circuit-meta {
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .circuit-body {
+    padding: 16px;
+  }
+
+  .ex-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .ex-row:last-child { border-bottom: none; }
+  .ex-num {
+    font-family: 'Bebas Neue';
+    font-size: 20px;
+    color: var(--accent2);
+    min-width: 24px;
+    line-height: 1;
+  }
+  .ex-details {}
+  .ex-title {
+    font-weight: 500;
+    font-size: 13px;
+  }
+  .ex-spec {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  @media (max-width: 480px) {
+    .macro-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .macro-val { font-size: 28px; }
+    .ex-focus { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-tag">Programme personnalisé</div>
+  <h1>RECOMPO<br><span>CORPORELLE</span></h1>
+  <p class="hero-sub">4 jours salle · Recomposition · 24 semaines</p>
+  <div class="hero-stats">
+    <div class="stat">
+      <span class="stat-val">78</span>
+      <span class="stat-label">Poids actuel (kg)</span>
+    </div>
+    <div class="stat">
+      <span class="stat-val">72-74</span>
+      <span class="stat-label">Objectif (kg)</span>
+    </div>
+    <div class="stat">
+      <span class="stat-val">1,73</span>
+      <span class="stat-label">Taille (m)</span>
+    </div>
+    <div class="stat">
+      <span class="stat-val">24</span>
+      <span class="stat-label">Semaines</span>
+    </div>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showSection('planning')">Planning</button>
+  <button class="tab" onclick="showSection('salle')">Salle</button>
+  <button class="tab" onclick="showSection('maison')">Maison</button>
+  <button class="tab" onclick="showSection('nutrition')">Nutrition</button>
+  <button class="tab" onclick="showSection('progression')">Progression</button>
+</div>
+
+<!-- PLANNING -->
+<div class="content section active" id="planning">
+  <div class="page-title">PLANNING HEBDO</div>
+  <p class="page-sub">4 jours de salle · 1 jour maison optionnel · Récupération optimisée</p>
+
+  <div class="info-box">
+    <strong>Principe du split :</strong> Push/Pull/Legs sur 4 jours avec récupération intelligente. Les groupes musculaires sont entraînés 2x par semaine avec au moins 48h entre chaque stimulus. Les épaules et le dos reçoivent un volume supérieur pour créer la silhouette en V.
+  </div>
+
+  <div class="week-grid">
+    <!-- Lundi -->
+    <div class="day-card" onclick="toggleDay(this)">
+      <div class="day-header">
+        <div class="day-left">
+          <div class="day-num">L</div>
+          <div class="day-info">
+            <div class="day-name">Lundi</div>
+            <div class="day-focus">Push — Pectoraux / Épaules / Triceps</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="day-badge">Séance A</span>
+          <span class="chevron">▾</span>
+        </div>
+      </div>
+      <div class="day-body">
+        <p class="ex-note" style="padding-top:12px;font-size:12px;color:var(--muted);">Durée estimée : 65-75 min · Échauffement 8 min</p>
+        <table class="ex-table">
+          <tr><th>Exercice</th><th>Séries × Reps</th><th>Note technique</th></tr>
+          <tr>
+            <td><div class="ex-name">Développé couché barre</div><div class="ex-note">Exercice principal</div></td>
+            <td><div class="ex-sets">4×5-8</div></td>
+            <td><div class="ex-focus">Charge lourde, descente contrôlée 2s</div></td>
+          </tr>
+          <tr>
+            <td><div class="ex-name">Développé incliné haltères</div><div class="ex-note">Haut pectoraux</div></td>
+            <td><div class="ex-sets">3×10-12</div></td>
+            <td><div class="ex-focus">30-45°, étirement complet en bas</div></td>
+          </tr>
+          <tr>
+            <td><div class="ex-name">Développé militaire haltères</div><div class="ex-note">Deltoïdes antérieurs/médians</div></td>
+            <td><div class="ex-sets">4×8-12</div></td>
+            <td><div class="ex-focus">Assis ou debout, core gaîné</div></td>
+          </tr>
+          <tr>
+            <td><div class="ex-name">Élévations latérales câble</div><div class="ex-note">★ Priorité épaules</div></td>
+            <td><div class="ex-sets">4×15-20</div></td>
+            <td><div class="ex-focus">Câble &gt; haltères : tension continue</div></td>
+          </tr>
+          <tr>
+            <td><div class="ex-name">Extension triceps poulie corde</div></td>
+            <td><div class="ex-sets">3×12-15</div></td>
+            <td><div class="ex-focus">Coudes fixes, écarter en bas</div></td>
+          </tr>
+          <tr>
+            <td><div class="ex-name">Dips lestés ou poids du corps</div></td>
+            <td><div class="ex-sets">3×8-12</div></td>
+            <td><div class="ex-focus">Légèrement penché vers l'avant</div></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- Mardi -->
+    <div class="day-card" onclick="toggleDay(this)">
+      <div class="day-header">
+        <div class="day-left">
+          <div class="day-num">M</div>
+          <div class="day-info">
+            <div class="day-name">Mardi</div>
+            <div class="day-focus">Pull — Dos / Biceps / Deltoïdes postérieurs</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="day-badge">Séance B</span>
+          <span class="chevron">▾</span>
+        </div>
+      </div>
+      <div class="day-body">
+        <p class="ex-note" style="padding-top:12px;font-size:12px;color:var(--muted);">Durée estimée : 65-75 min · Volume dos élevé pour créer la largeur</p>
+        <table class="ex-table">
+          <tr><th>Exercice</th><th>Séries × Reps</th><th>Note technique</th></tr>
+          <tr>
+            <td><div class="ex-name">Tractions ou Poulie haute prise large</div><div class="ex-note">Largeur dos — priorité absolue</div></td>
+            <td><div class="ex-sets">4×6-10</div></td>
+            <td><div class="ex-focus">Tractions si possible, coudes vers le bas</div></td>
+          </tr>
+          <tr>
+            <td><div class="ex-name">Rowing poitrine appuyée (T-bar ou machine)</div><div class="ex-note">Épaisseur dos</div></td>
+            <td><div class="ex-sets">4×8-12</div></td>
+            <td><div class="ex-focus">Poitrine collée, tirage vers nombril</div></td>
+          </tr>
+          <tr>
+            <td><div class="ex-name">Rowing unilatéral haltère</div></td>
+            <td><div class="ex-sets">3×10-12</div></td>
+            <td><div class="ex-focus">Rotation du torse, étirement complet</div></td>
+          </tr>
+          <tr>
+            <td><div class="ex-name">Oiseau poulie basse (reverse fly)</div><div class="ex-note">★ Deltoïdes postérieurs</div></td>
+            <td><div class="ex-sets">4×15-20</div></td>
+            <td><div class="ex-focus">Corrige la posture enroulée</div></td>
+          </tr>
+          <tr>
+            <td><div class="ex-name">Face pull câble</div><div class="ex-note">Posture + rotateurs</div></td>
+            <td><div class="ex-sets">3×15-20</div></td>
+            <td><div class="ex-focus">Corde à hauteur du visage, coudes haut</div></td>
+          </tr>
+          <tr>
+            <td><div class="ex-name">Curl biceps barre EZ ou haltères</div></td>
+            <td><div class="ex-sets">3×10-12</div></td>
+            <td><div class="ex-focus">Contrôle excentrique 2-3s</div></td>
+          </tr>
+          <tr>
+            <td><div class="ex-name">Curl incliné haltères</div><div class="ex-note">Longue portion biceps</div></td>
+            <td><div class="ex-sets">3×10-12</div></td>
+            <td><div class="ex-focus">Banc incliné 45°, bras derrière le corps</div></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- Mercredi -->
+    <div class="day-card rest" onclick="toggleDay(this)">
+      <div class="day-header">
+        <div class="day-left">
+          <div class="day-num">M</div>
+          <div class="day-info">
+            <div class="day-name">Mercredi</div>
+            <div class="day-focus">Récupération active</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="day-badge rest-badge">Repos</span>
+          <span class="chevron">▾</span>
+        </div>
+      </div>
+      <div class="day-body">
+        <div class="info-box" style="margin-top:12px">
+          <strong>Récupération active :</strong> Marche 30-45 min à faible intensité. Étirements 15 min ciblant pectoraux, biceps et mollets. Le repos est aussi important que l'entraînement pour la recompo.
+        </div>
+      </div>
+    </div>
+
+    <!-- Jeudi -->
+    <div class="day-card" onclick="toggleDay(this)">
+      <div class="day-header">
+        <div class="day-left">
+          <div class="day-num">J</div>
+          <div class="day-info">
+            <div class="day-name">Jeudi</div>
+            <div class="day-focus">Legs — Quadriceps / Ischio / Fessiers / Mollets</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="day-badge">Séance C</span>
+          <span class="chevron">▾</span>
+        </div>
+      </div>
+      <div class="day-body">
+        <p class="ex-note" style="padding-top:12px;font-size:12px;color:var(--muted);">Durée estimée : 60-70 min · Les jambes = 50% de la masse musculaire du corps</p>
+        <div class="info-box orange" style="margin-top:12px;margin-bottom:4px;">
+          <strong>Pourquoi ne pas négliger les jambes :</strong> entraîner les jambes booste la testostérone et la GH naturelle, ce qui améliore la recompo du haut du corps et brûle plus de graisses au total.
+        </div>
+        <table class="ex-table">
+          <tr><th>Exercice</th><th>Séries × Reps</th><th>Note technique</th></tr>
+          <tr>
+            <td><div class="ex-name">Squat barre ou goblet squat</div><div class="ex-note">Exercice principal</div></td>
+            <td><div class="ex-sets">4×6-10</div></td>
+            <td><div class="ex-focus">Profondeur paralèlle minimum</div></td>
+          </tr>
+          <tr>
+            <td><div class="ex-name">Presse à cuisses</div></td>
+            <td><div class="ex-sets">3×10-12</div></td>
+            <td><div class="ex-focus">Pieds hauts pour fessiers, bas pour quads</div></td>
+          </tr>
+          <tr>
+            <td><div class="ex-name">Leg extension</div></td>
+            <td><div class="ex-sets">3×12-15</div></td>
+            <td><div class="ex-focus">Isolation quadriceps, tempo lent</div></td>
+          </tr>
+          <tr>
+            <td><div class="ex-name">Leg curl couché</div></td>
+            <td><div class="ex-sets">4×10-12</div></td>
+            <td><div class="ex-focus">Ischio souvent négligés — corrige déséquilibre</div></td>
+          </tr>
+          <tr>
+            <td><div class="ex-name">Hip thrust barre (fessiers)</div></td>
+            <td><div class="ex-sets">3×12-15</div></td>
+            <td><div class="ex-focus">Meilleur exercice fessiers, gaîner le core</div></td>
+          </tr>
+          <tr>
+            <td><div class="ex-name">Mollets à la presse ou debout</div></td>
+            <td><div class="ex-sets">4×15-20</div></td>
+            <td><div class="ex-focus">Amplitude complète, pause en bas</div></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- Vendredi -->
+    <div class="day-card" onclick="toggleDay(this)">
+      <div class="day-header">
+        <div class="day-left">
+          <div class="day-num">V</div>
+          <div class="day-info">
+            <div class="day-name">Vendredi</div>
+            <div class="day-focus">Upper — Épaules / Dos / Pectoraux (volume)</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="day-badge">Séance D</span>
+          <span class="chevron">▾</span>
+        </div>
+      </div>
+      <div class="day-body">
+        <p class="ex-note" style="padding-top:12px;font-size:12px;color:var(--muted);">Durée estimée : 60-70 min · 2e stimulus haut du corps de la semaine</p>
+        <div class="info-box" style="margin-top:12px;margin-bottom:4px;">
+          <strong>Objectif séance D :</strong> second stimulus pour épaules et dos avec charges modérées et séries plus longues (hypertrophie). Moins lourd que lundi/mardi mais plus de volume.
+        </div>
+        <table class="ex-table">
+          <tr><th>Exercice</th><th>Séries × Reps</th><th>Note technique</th></tr>
+          <tr>
+            <td><div class="ex-name">Élévations latérales câble</div><div class="ex-note">★ Priorité — 2e passage semaine</div></td>
+            <td><div class="ex-sets">5×15-20</div></td>
+            <td><div class="ex-focus">Légères charges, qualité du mouvement</div></td>
+          </tr>
+          <tr>
+            <td><div class="ex-name">Développé Arnold haltères</div></td>
+            <td><div class="ex-sets">3×10-12</div></td>
+            <td><div class="ex-focus">Rotation travaille toutes les têtes deltoïde</div></td>
+          </tr>
+          <tr>
+            <td><div class="ex-name">Traction neutre (prise serrée) ou poulie</div></td>
+            <td><div class="ex-sets">3×8-10</div></td>
+            <td><div class="ex-focus">Largeur dos + grand rond</div></td>
+          </tr>
+          <tr>
+            <td><div class="ex-name">Oiseau poulie (rear delt)</div><div class="ex-note">2e passage semaine</div></td>
+            <td><div class="ex-sets">3×15-20</div></td>
+            <td><div class="ex-focus">Posture prioritaire</div></td>
+          </tr>
+          <tr>
+            <td><div class="ex-name">Écarté poulie basse (pectoraux)</div></td>
+            <td><div class="ex-sets">3×12-15</div></td>
+            <td><div class="ex-focus">Tension en position d'étirement maximale</div></td>
+          </tr>
+          <tr>
+            <td><div class="ex-name">Gainage anti-rotation (Pallof press)</div><div class="ex-note">★ Ajout — ventre</div></td>
+            <td><div class="ex-sets">3×12/côté</div></td>
+            <td><div class="ex-focus">Stabilisation du core, réduit la lordose</div></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- Samedi -->
+    <div class="day-card rest" onclick="toggleDay(this)">
+      <div class="day-header">
+        <div class="day-left">
+          <div class="day-num">S</div>
+          <div class="day-info">
+            <div class="day-name">Samedi</div>
+            <div class="day-focus">Récupération / Cardio léger optionnel</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="day-badge rest-badge">Repos</span>
+          <span class="chevron">▾</span>
+        </div>
+      </div>
+      <div class="day-body">
+        <div class="info-box" style="margin-top:12px">
+          <strong>Option cardio :</strong> 20-30 min de vélo léger ou natation. Intensité faible (zone 2 : tu peux tenir une conversation). Objectif : flux sanguin pour récupérer, pas brûler des calories.
+        </div>
+      </div>
+    </div>
+
+    <!-- Dimanche -->
+    <div class="day-card rest" onclick="toggleDay(this)">
+      <div class="day-header">
+        <div class="day-left">
+          <div class="day-num">D</div>
+          <div class="day-info">
+            <div class="day-name">Dimanche</div>
+            <div class="day-focus">Marche longue</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="day-badge rest-badge">Cardio doux</span>
+          <span class="chevron">▾</span>
+        </div>
+      </div>
+      <div class="day-body">
+        <div class="info-box" style="margin-top:12px">
+          <strong>45-90 min de marche :</strong> Excellent pour brûler des graisses sans catabolisme musculaire. Idéal à jeun le matin pour maximiser l'oxydation des lipides. Écouter un podcast, décompresser mentalement.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SALLE -->
+<div class="content section" id="salle">
+  <div class="page-title">SÉANCES SALLE</div>
+  <p class="page-sub">Détail complet des 4 séances · Surcharge progressive · Proche de l'échec</p>
+
+  <div class="info-box">
+    <strong>Règle de progression :</strong> Dès que tu atteins le haut de la fourchette de reps sur toutes les séries, augmente la charge de 2,5 kg la prochaine fois. Si tu n'atteins pas le bas de la fourchette sur la 1ère série, baisse la charge.
+  </div>
+  <div class="info-box orange">
+    <strong>RPE cible :</strong> Finir chaque série à RPE 8-9 (1 à 2 reps en réserve). Jamais à l'échec total pour préserver la récupération en recompo.
+  </div>
+
+  <p class="section-label">Séance A · Lundi · Push lourd</p>
+  <table class="ex-table" style="background:var(--surface);border-radius:8px;overflow:hidden;border:1px solid var(--border);margin-bottom:24px;">
+    <tr><th style="padding:12px 12px 8px">Exercice</th><th>Séries</th><th>Repos</th></tr>
+    <tr><td style="padding:10px 12px"><div class="ex-name">Développé couché barre</div><div class="ex-note">Échauffement 2×8 léger</div></td><td><div class="ex-sets">4×5-8</div></td><td><div style="font-size:12px;color:var(--muted);">2-3 min</div></td></tr>
+    <tr><td style="padding:10px 12px"><div class="ex-name">Développé incliné haltères</div></td><td><div class="ex-sets">3×10-12</div></td><td><div style="font-size:12px;color:var(--muted);">90 s</div></td></tr>
+    <tr><td style="padding:10px 12px"><div class="ex-name">Développé militaire haltères</div></td><td><div class="ex-sets">4×8-12</div></td><td><div style="font-size:12px;color:var(--muted);">2 min</div></td></tr>
+    <tr><td style="padding:10px 12px"><div class="ex-name">Élévations latérales câble</div><div class="ex-note">Cable &gt; haltères pour tension constante</div></td><td><div class="ex-sets">4×15-20</div></td><td><div style="font-size:12px;color:var(--muted);">60 s</div></td></tr>
+    <tr><td style="padding:10px 12px"><div class="ex-name">Extension triceps corde</div></td><td><div class="ex-sets">3×12-15</div></td><td><div style="font-size:12px;color:var(--muted);">60 s</div></td></tr>
+    <tr><td style="padding:10px 12px"><div class="ex-name">Dips</div></td><td><div class="ex-sets">3×8-12</div></td><td><div style="font-size:12px;color:var(--muted);">90 s</div></td></tr>
+  </table>
+
+  <p class="section-label">Séance B · Mardi · Pull + Biceps</p>
+  <table class="ex-table" style="background:var(--surface);border-radius:8px;overflow:hidden;border:1px solid var(--border);margin-bottom:24px;">
+    <tr><th style="padding:12px 12px 8px">Exercice</th><th>Séries</th><th>Repos</th></tr>
+    <tr><td style="padding:10px 12px"><div class="ex-name">Tractions / Poulie haute prise large</div></td><td><div class="ex-sets">4×6-10</div></td><td><div style="font-size:12px;color:var(--muted);">2-3 min</div></td></tr>
+    <tr><td style="padding:10px 12px"><div class="ex-name">Rowing poitrine appuyée</div></td><td><div class="ex-sets">4×8-12</div></td><td><div style="font-size:12px;color:var(--muted);">2 min</div></td></tr>
+    <tr><td style="padding:10px 12px"><div class="ex-name">Rowing unilatéral haltère</div></td><td><div class="ex-sets">3×10-12</div></td><td><div style="font-size:12px;color:var(--muted);">90 s</div></td></tr>
+    <tr><td style="padding:10px 12px"><div class="ex-name">Oiseau poulie basse (rear delt)</div></td><td><div class="ex-sets">4×15-20</div></td><td><div style="font-size:12px;color:var(--muted);">60 s</div></td></tr>
+    <tr><td style="padding:10px 12px"><div class="ex-name">Face pull câble</div><div class="ex-note">★ Ajout essentiel pour ta posture</div></td><td><div class="ex-sets">3×15-20</div></td><td><div style="font-size:12px;color:var(--muted);">60 s</div></td></tr>
+    <tr><td style="padding:10px 12px"><div class="ex-name">Curl barre EZ</div></td><td><div class="ex-sets">3×10-12</div></td><td><div style="font-size:12px;color:var(--muted);">90 s</div></td></tr>
+    <tr><td style="padding:10px 12px"><div class="ex-name">Curl incliné haltères</div></td><td><div class="ex-sets">3×10-12</div></td><td><div style="font-size:12px;color:var(--muted);">90 s</div></td></tr>
+  </table>
+
+  <p class="section-label">Séance C · Jeudi · Legs</p>
+  <table class="ex-table" style="background:var(--surface);border-radius:8px;overflow:hidden;border:1px solid var(--border);margin-bottom:24px;">
+    <tr><th style="padding:12px 12px 8px">Exercice</th><th>Séries</th><th>Repos</th></tr>
+    <tr><td style="padding:10px 12px"><div class="ex-name">Squat barre</div><div class="ex-note">Échauffement progressif obligatoire</div></td><td><div class="ex-sets">4×6-10</div></td><td><div style="font-size:12px;color:var(--muted);">3 min</div></td></tr>
+    <tr><td style="padding:10px 12px"><div class="ex-name">Presse à cuisses</div></td><td><div class="ex-sets">3×10-12</div></td><td><div style="font-size:12px;color:var(--muted);">2 min</div></td></tr>
+    <tr><td style="padding:10px 12px"><div class="ex-name">Leg extension</div></td><td><div class="ex-sets">3×12-15</div></td><td><div style="font-size:12px;color:var(--muted);">60 s</div></td></tr>
+    <tr><td style="padding:10px 12px"><div class="ex-name">Leg curl couché</div></td><td><div class="ex-sets">4×10-12</div></td><td><div style="font-size:12px;color:var(--muted);">90 s</div></td></tr>
+    <tr><td style="padding:10px 12px"><div class="ex-name">Hip thrust barre</div><div class="ex-note">★ Ajout — fessiers et stabilisation bassin</div></td><td><div class="ex-sets">3×12-15</div></td><td><div style="font-size:12px;color:var(--muted);">90 s</div></td></tr>
+    <tr><td style="padding:10px 12px"><div class="ex-name">Mollets à la presse</div></td><td><div class="ex-sets">4×15-20</div></td><td><div style="font-size:12px;color:var(--muted);">60 s</div></td></tr>
+  </table>
+
+  <p class="section-label">Séance D · Vendredi · Upper volume</p>
+  <table class="ex-table" style="background:var(--surface);border-radius:8px;overflow:hidden;border:1px solid var(--border);margin-bottom:24px;">
+    <tr><th style="padding:12px 12px 8px">Exercice</th><th>Séries</th><th>Repos</th></tr>
+    <tr><td style="padding:10px 12px"><div class="ex-name">Élévations latérales câble</div><div class="ex-note">★ 2e stimulus épaules — essentiel</div></td><td><div class="ex-sets">5×15-20</div></td><td><div style="font-size:12px;color:var(--muted);">60 s</div></td></tr>
+    <tr><td style="padding:10px 12px"><div class="ex-name">Développé Arnold haltères</div></td><td><div class="ex-sets">3×10-12</div></td><td><div style="font-size:12px;color:var(--muted);">90 s</div></td></tr>
+    <tr><td style="padding:10px 12px"><div class="ex-name">Traction prise neutre ou poulie</div></td><td><div class="ex-sets">3×8-10</div></td><td><div style="font-size:12px;color:var(--muted);">2 min</div></td></tr>
+    <tr><td style="padding:10px 12px"><div class="ex-name">Oiseau poulie (rear delt)</div></td><td><div class="ex-sets">3×15-20</div></td><td><div style="font-size:12px;color:var(--muted);">60 s</div></td></tr>
+    <tr><td style="padding:10px 12px"><div class="ex-name">Écarté poulie basse</div></td><td><div class="ex-sets">3×12-15</div></td><td><div style="font-size:12px;color:var(--muted);">60 s</div></td></tr>
+    <tr><td style="padding:10px 12px"><div class="ex-name">Pallof press (gainage anti-rotation)</div><div class="ex-note">★ Correction lordose / ventre</div></td><td><div class="ex-sets">3×12/côté</div></td><td><div style="font-size:12px;color:var(--muted);">60 s</div></td></tr>
+  </table>
+</div>
+
+<!-- MAISON -->
+<div class="content section" id="maison">
+  <div class="page-title">PROGRAMME MAISON</div>
+  <p class="page-sub">Sans matériel · Ab roller + Dips + Pompes + Corde à sauter</p>
+
+  <div class="info-box orange">
+    <strong>Quand utiliser ce programme :</strong> Voyages, impossibilité d'aller en salle, ou en complément un 5e jour optionnel. Il ne remplace pas la salle mais maintient le stimulus musculaire et brûle de la graisse.
+  </div>
+
+  <p class="section-label">Session Alpha · Full Body intense · 45-50 min</p>
+  <div class="circuit-card">
+    <div class="circuit-header">
+      <span class="circuit-title">ÉCHAUFFEMENT</span>
+      <span class="circuit-meta">5 min</span>
+    </div>
+    <div class="circuit-body">
+      <div class="ex-row">
+        <div class="ex-num">→</div>
+        <div class="ex-details">
+          <div class="ex-title">Corde à sauter</div>
+          <div class="ex-spec">3 × 1 min · Alternance pied-pied puis double saut · Repos 30 s</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="circuit-card">
+    <div class="circuit-header">
+      <span class="circuit-title">BLOC PUSH — 4 tours</span>
+      <span class="circuit-meta">Repos 90 s entre tours</span>
+    </div>
+    <div class="circuit-body">
+      <div class="ex-row">
+        <div class="ex-num">1</div>
+        <div class="ex-details">
+          <div class="ex-title">Dips sur barres</div>
+          <div class="ex-spec">Max - 2 reps · Lestage possible avec sac à dos</div>
+        </div>
+      </div>
+      <div class="ex-row">
+        <div class="ex-num">2</div>
+        <div class="ex-details">
+          <div class="ex-title">Pompes pieds surélevés (haut pecs + épaules)</div>
+          <div class="ex-spec">15-20 reps · Pieds sur chaise ou lit</div>
+        </div>
+      </div>
+      <div class="ex-row">
+        <div class="ex-num">3</div>
+        <div class="ex-details">
+          <div class="ex-title">Pike push-ups (épaules)</div>
+          <div class="ex-spec">10-15 reps · Corps en V inversé, tête vers le sol</div>
+        </div>
+      </div>
+      <div class="ex-row">
+        <div class="ex-num">4</div>
+        <div class="ex-details">
+          <div class="ex-title">Pompes diamant (triceps)</div>
+          <div class="ex-spec">10-15 reps · Mains proches formant un losange</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="circuit-card">
+    <div class="circuit-header">
+      <span class="circuit-title">BLOC PULL + CORE — 4 tours</span>
+      <span class="circuit-meta">Repos 90 s entre tours</span>
+    </div>
+    <div class="circuit-body">
+      <div class="ex-row">
+        <div class="ex-num">1</div>
+        <div class="ex-details">
+          <div class="ex-title">Ab roller — extension genoux</div>
+          <div class="ex-spec">8-12 reps · Dos plat, gaîner fort. Exercice roi du core</div>
+        </div>
+      </div>
+      <div class="ex-row">
+        <div class="ex-num">2</div>
+        <div class="ex-details">
+          <div class="ex-title">Ab roller — extension debout (si possible)</div>
+          <div class="ex-spec">5-8 reps · Version avancée quand genoux maîtrisés</div>
+        </div>
+      </div>
+      <div class="ex-row">
+        <div class="ex-num">3</div>
+        <div class="ex-details">
+          <div class="ex-title">Gainage latéral dynamique</div>
+          <div class="ex-spec">12 reps/côté · Hanche monte et descend</div>
+        </div>
+      </div>
+      <div class="ex-row">
+        <div class="ex-num">4</div>
+        <div class="ex-details">
+          <div class="ex-title">Superman (extension lombaires)</div>
+          <div class="ex-spec">15 reps · Sol, bras et jambes décollent simultanément</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="circuit-card">
+    <div class="circuit-header">
+      <span class="circuit-title">BLOC LEGS + CARDIO — 3 tours</span>
+      <span class="circuit-meta">Repos 90 s entre tours</span>
+    </div>
+    <div class="circuit-body">
+      <div class="ex-row">
+        <div class="ex-num">1</div>
+        <div class="ex-details">
+          <div class="ex-title">Squats tempo (3-1-1)</div>
+          <div class="ex-spec">20 reps · 3s descente, 1s pause bas, 1s montée</div>
+        </div>
+      </div>
+      <div class="ex-row">
+        <div class="ex-num">2</div>
+        <div class="ex-details">
+          <div class="ex-title">Fentes bulgares</div>
+          <div class="ex-spec">10 reps/jambe · Pied arrière sur chaise</div>
+        </div>
+      </div>
+      <div class="ex-row">
+        <div class="ex-num">3</div>
+        <div class="ex-details">
+          <div class="ex-title">Corde à sauter HIIT</div>
+          <div class="ex-spec">30 s max intensity / 30 s récup · × 4 rounds</div>
+        </div>
+      </div>
+      <div class="ex-row">
+        <div class="ex-num">4</div>
+        <div class="ex-details">
+          <div class="ex-title">Burpees sans saut (option low-impact)</div>
+          <div class="ex-spec">10 reps · Pompe en bas, montée contrôlée</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="section-label">Session Beta · Voyage / hôtel · 30 min</p>
+  <div class="circuit-card">
+    <div class="circuit-header">
+      <span class="circuit-title">CIRCUIT MINIMALISTE — 5 tours</span>
+      <span class="circuit-meta">Repos 2 min entre tours</span>
+    </div>
+    <div class="circuit-body">
+      <div class="ex-row"><div class="ex-num">1</div><div class="ex-details"><div class="ex-title">Dips sur chaise</div><div class="ex-spec">Max - 2 reps</div></div></div>
+      <div class="ex-row"><div class="ex-num">2</div><div class="ex-details"><div class="ex-title">Pompes</div><div class="ex-spec">15-20 reps</div></div></div>
+      <div class="ex-row"><div class="ex-num">3</div><div class="ex-details"><div class="ex-title">Pike push-ups</div><div class="ex-spec">10-12 reps</div></div></div>
+      <div class="ex-row"><div class="ex-num">4</div><div class="ex-details"><div class="ex-title">Squats tempo</div><div class="ex-spec">20 reps</div></div></div>
+      <div class="ex-row"><div class="ex-num">5</div><div class="ex-details"><div class="ex-title">Gainage dynamique (mountain climbers lents)</div><div class="ex-spec">40 s</div></div></div>
+      <div class="ex-row"><div class="ex-num">6</div><div class="ex-details"><div class="ex-title">Ab roller si disponible ou crunchs</div><div class="ex-spec">10-15 reps</div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- NUTRITION -->
+<div class="content section" id="nutrition">
+  <div class="page-title">NUTRITION</div>
+  <p class="page-sub">Déficit modéré · Protéines élevées · 80% aliments bruts</p>
+
+  <div class="macro-grid">
+    <div class="macro-card">
+      <div class="macro-val">2200<span class="macro-unit">-2400</span></div>
+      <div class="macro-label">kcal / jour</div>
+    </div>
+    <div class="macro-card">
+      <div class="macro-val">150<span class="macro-unit">g</span></div>
+      <div class="macro-label">Protéines</div>
+    </div>
+    <div class="macro-card">
+      <div class="macro-val">65<span class="macro-unit">g</span></div>
+      <div class="macro-label">Lipides</div>
+    </div>
+  </div>
+
+  <div class="info-box">
+    <strong>Principe clé :</strong> À 78 kg tu n'as pas besoin d'un déficit agressif. 2200-2400 kcal avec 150g de protéines suffit pour perdre de la graisse <em>et</em> construire du muscle simultanément. Le déficit agressif détruit le muscle.
+  </div>
+
+  <p class="section-label">Exemple de journée type</p>
+
+  <div class="meal-card">
+    <div class="meal-time">07h00 · Petit-déjeuner</div>
+    <div class="meal-name">Protéines + glucides complexes</div>
+    <div class="meal-detail">3 œufs entiers + 80g flocons d'avoine + 1 banane + café noir<br>~550 kcal · ~32g protéines</div>
+  </div>
+
+  <div class="meal-card">
+    <div class="meal-time">12h30 · Déjeuner</div>
+    <div class="meal-name">Repas principal post-training ou midi</div>
+    <div class="meal-detail">180g poulet / dinde + 150g riz cuit + légumes à volonté + huile olive<br>~650 kcal · ~50g protéines</div>
+  </div>
+
+  <div class="meal-card">
+    <div class="meal-time">16h00 · Collation</div>
+    <div class="meal-name">Protéines rapides</div>
+    <div class="meal-detail">200g fromage blanc 0% ou Skyr + fruits rouges (ou whey si objectif non atteint)<br>~200 kcal · ~25g protéines</div>
+  </div>
+
+  <div class="meal-card">
+    <div class="meal-time">19h30 · Dîner</div>
+    <div class="meal-name">Protéines + légumes</div>
+    <div class="meal-detail">200g saumon / thon / sardines + 200g patate douce + légumes verts<br>~600 kcal · ~45g protéines</div>
+  </div>
+
+  <p class="section-label">Suppléments utiles</p>
+  <div class="supps">
+    <div class="supp">
+      <div class="supp-icon">⚡</div>
+      <div>
+        <div class="supp-name">Créatine monohydrate</div>
+        <div class="supp-dose">5g/jour · À n'importe quel moment · Le plus prouvé scientifiquement</div>
+      </div>
+    </div>
+    <div class="supp">
+      <div class="supp-icon">🥛</div>
+      <div>
+        <div class="supp-name">Whey protéine</div>
+        <div class="supp-dose">Uniquement si tu n'atteins pas 150g de protéines via la nourriture</div>
+      </div>
+    </div>
+    <div class="supp">
+      <div class="supp-icon">☕</div>
+      <div>
+        <div class="supp-name">Caféine</div>
+        <div class="supp-dose">100-200mg avant entraînement · Optionnel · Café suffit</div>
+      </div>
+    </div>
+    <div class="supp">
+      <div class="supp-icon">🌙</div>
+      <div>
+        <div class="supp-name">Sommeil 7-9h</div>
+        <div class="supp-dose">★ Le supplément le plus important. Sans lui, pas de recompo.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PROGRESSION -->
+<div class="content section" id="progression">
+  <div class="page-title">PROGRESSION 24 SEMAINES</div>
+  <p class="page-sub">3 blocs · 2 déloads · Objectif : 72-74 kg avec plus de muscle</p>
+
+  <div class="info-box">
+    <strong>Suivi hebdomadaire :</strong> Pesée chaque matin au réveil (même conditions). Photo face + profil chaque dimanche matin. Tour de taille toutes les 2 semaines. La balance est une donnée parmi d'autres — les photos et le miroir comptent plus.
+  </div>
+
+  <p class="section-label">Bloc 1 · Semaines 1-8</p>
+  <div class="prog-block">
+    <div class="prog-weeks">SEMAINES 1-4</div>
+    <div class="prog-title">Apprentissage des mouvements</div>
+    <div class="prog-desc">Charges à 60-70% de ton max. Priorité absolue à la technique sur chaque exercice. Ne cherche pas à aller lourd. Apprends à sentir chaque muscle travailler. Mange à 2400 kcal.</div>
+  </div>
+  <div class="prog-block">
+    <div class="prog-weeks">SEMAINES 5-8</div>
+    <div class="prog-title">Montée en charge progressive</div>
+    <div class="prog-desc">Augmente les charges dès que tu atteins le haut de ta fourchette de reps. +2,5 kg sur les grands mouvements, +1 kg sur les isolations. Tu devrais commencer à sentir le corps changer à la semaine 6-7.</div>
+  </div>
+
+  <div class="prog-block deload">
+    <div class="prog-weeks">SEMAINE 9</div>
+    <div class="prog-title">Déload — Récupération obligatoire</div>
+    <div class="prog-desc">Réduis le volume de 40-50% (2 séries au lieu de 4). Charges identiques ou -10%. Garde les 4 séances mais raccourcis-les. Le déload est quand le muscle se reconstruit réellement.</div>
+  </div>
+
+  <p class="section-label">Bloc 2 · Semaines 10-16</p>
+  <div class="prog-block b2">
+    <div class="prog-weeks">SEMAINES 10-13</div>
+    <div class="prog-title">Nouveau palier de charges</div>
+    <div class="prog-desc">Reprends là où tu t'étais arrêté et continue de progresser. À ce stade le corps aura notablement changé. Poids cible : 75-76 kg. Passe à 2300 kcal si la progression stagne.</div>
+  </div>
+  <div class="prog-block b2">
+    <div class="prog-weeks">SEMAINES 14-16</div>
+    <div class="prog-title">Intensification</div>
+    <div class="prog-desc">Ajoute des techniques d'intensification sur 1 exercice par séance : drop sets sur élévations latérales, rest-pause sur tractions. Pas sur les exercices lourds pluriarticulaires.</div>
+  </div>
+
+  <div class="prog-block deload">
+    <div class="prog-weeks">SEMAINE 17</div>
+    <div class="prog-title">Déload — 2e récupération</div>
+    <div class="prog-desc">Même protocole que semaine 9. Profites-en pour prendre des photos et mesures complètes.</div>
+  </div>
+
+  <p class="section-label">Bloc 3 · Semaines 18-24</p>
+  <div class="prog-block b3">
+    <div class="prog-weeks">SEMAINES 18-24</div>
+    <div class="prog-title">Bloc final — Transformation visible</div>
+    <div class="prog-desc">Volume maximal de la phase. Si tout s'est bien passé, tu seras à 73-74 kg avec des épaules nettement plus larges et un ventre réduit. Passe à 2200 kcal si besoin pour affiner. Photos finales semaine 24.</div>
+  </div>
+
+  <div class="info-box" style="margin-top:24px">
+    <strong>Objectifs réalistes à 24 semaines :</strong> Perte de 4-6 kg de graisse · Gain musculaire visible (épaules, dos, bras) · Tour de taille -5 à -8 cm · Posture améliorée · Force doublée sur la plupart des exercices.
+  </div>
+</div>
+
+<script>
+  function showSection(id) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    event.target.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function toggleDay(card) {
+    card.classList.toggle('open');
+  }
+</script>
+</body>
+</html>
